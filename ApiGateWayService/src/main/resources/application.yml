@@ -1,0 +1,77 @@
+server:
+  port: 8013
+  
+spring:
+  application:
+    name:  API-GATEWAY
+      cloud:
+    gateway:
+      routes:
+      - id: productService
+        uri: lb://PRODUCT-SERVICE 
+        predicates:
+        - Path=/product/**
+        filters:
+        - name: CircuitBreaker
+          args:
+            name: product-service
+            fallbackuri: forward:/fallback/productService
+        
+               
+      - id: orderService
+        uri: lb://ORDER-SERVICE 
+        predicates:
+        - Path=/orders/**
+        filters:
+        - name: CircuitBreaker
+          args:
+            name: order-service
+            fallbackuri: forward:/fallback/orderService
+            
+      - id: paymentService
+        uri: lb://PAYMENT-SERVICE 
+        predicates:
+        - Path=/payment/**
+        filters:
+        - name: CircuitBreaker
+          args:
+            name: payment-service
+            fallbackuri: forward:/fallback/paymentService
+      
+      - id: defaulttService
+        uri: lb://DEFAULT-SERVICE 
+        predicates:
+        - Path=/**
+        filters:
+        - name: CircuitBreaker
+          args:
+            name: deafult-service
+            fallbackuri: forward:/fallback/default
+         
+            
+            
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 10
+      minimumNumberOfCalls: 5
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      waitDurationInOpenState: 2s
+      failureRateThreshold: 5
+      eventConsumerBufferSize: 10
+      slowCallDurationThreshold: 200ms
+      slowCallRateThreshold: 30
+      recordExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+        - java.io.IOException
+      ignoreExceptions:
+        - java.lang.IllegalStateException
+    shared:
+      slidingWindowSize: 100
+      permittedNumberOfCallsInHalfOpenState: 30
+      waitDurationInOpenState: 1s
+      failureRateThreshold: 50
+      eventConsumerBufferSize: 10
+      ignoreExceptions:
+        - java.lang.IllegalStateException
