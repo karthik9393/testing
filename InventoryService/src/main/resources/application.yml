@@ -1,0 +1,18 @@
+server:
+  port: 8014 
+ 
+spring:    
+  application:
+    name: inventory-service   
+      
+    
+eureka:         
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 2
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    healthcheck:
+      enabled: true      
+
